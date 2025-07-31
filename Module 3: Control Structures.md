@@ -1,150 +1,203 @@
 ---
 
-## 📘 Module 4: Functions and Scope
+## 📘 Module 3: Control Structures
 
-**🎯 Objective: Structure scripts using functions**
-
----
-
-### 🔹 **1. Defining and Calling Functions**
-
-Functions in Bash help organize code, promote reusability, and improve readability.
-
-#### 🔧 Defining a Function (Two Styles):
-
-```bash
-# Style 1
-my_function() {
-    echo "Hello from a function"
-}
-
-# Style 2 (less common)
-function my_function {
-    echo "Hello from a function"
-}
-```
-
-#### ✅ Calling a Function:
-
-```bash
-my_function
-```
-
-#### 🧪 Example:
-
-```bash
-greet() {
-    echo "Hello, $1!"
-}
-
-greet "Alice"
-```
-
-> Output: `Hello, Alice!`
+**🎯 Objective: Learn how to add logic to your scripts**
 
 ---
 
-### 🔹 **2. Local and Global Variables**
+### 🔹 **1. Conditional Statements**
 
-In Bash:
+#### ✅ `if`, `else`, `elif`
 
-* By default, variables are **global**, even inside functions.
-* Use `local` to declare variables **local to a function**.
-
-#### 🔍 Example:
+The syntax:
 
 ```bash
-name="Global"
-
-say_name() {
-    local name="Local"
-    echo "Inside function: $name"
-}
-
-say_name
-echo "Outside function: $name"
-```
-
-> Output:
-
-```
-Inside function: Local  
-Outside function: Global
-```
-
----
-
-### 🔹 **3. Function Return Values**
-
-* You can use the `return` keyword to return an **exit status** (0–255).
-* For returning **data** (e.g., strings or numbers), use **echo** and command substitution.
-
-#### ⚠️ `return` is **not** for returning strings, only numeric exit codes.
-
-#### 🔁 Example 1: Returning Exit Status
-
-```bash
-check_even() {
-    if (( $1 % 2 == 0 )); then
-        return 0
-    else
-        return 1
-    fi
-}
-
-check_even 4
-if [ $? -eq 0 ]; then
-    echo "Even number"
+if [ condition ]; then
+    # code if true
+elif [ another_condition ]; then
+    # code if another condition is true
 else
-    echo "Odd number"
+    # code if none are true
+fi
+```
+
+#### Example:
+
+```bash
+read -p "Enter a number: " num
+if [ "$num" -gt 0 ]; then
+    echo "Positive"
+elif [ "$num" -lt 0 ]; then
+    echo "Negative"
+else
+    echo "Zero"
 fi
 ```
 
 ---
 
-#### 🔁 Example 2: Returning a Value via `echo`
+### 🔹 **2. test, \[ ], and \[\[ ]]**
+
+These are used to evaluate conditions.
+
+| Syntax       | Notes                                |
+| ------------ | ------------------------------------ |
+| `test expr`  | Legacy POSIX command                 |
+| `[ expr ]`   | Common form, same as `test`          |
+| `[[ expr ]]` | Bash-specific, more powerful & safer |
+
+#### Comparison Operators:
+
+| Type    | `[ ]` / `test`            | `[[ ]]`          |
+| ------- | ------------------------- | ---------------- |
+| Numbers | `-eq`, `-lt`, `-gt`, etc. | same             |
+| Strings | `=`, `!=`, `-z`, `-n`     | same, plus regex |
+| Files   | `-f`, `-d`, `-e`, `-r`    | same             |
+
+#### Example:
 
 ```bash
-get_name() {
-    echo "Alice"
-}
+if [ "$name" = "Alice" ]; then
+    echo "Welcome, Alice"
+fi
+```
 
-name=$(get_name)
-echo "User is: $name"
+#### File test example:
+
+```bash
+if [ -f "myfile.txt" ]; then
+    echo "File exists"
+fi
 ```
 
 ---
 
-### 🔹 **4. `$?` and Exit Status**
+### 🔹 **3. Case Statement: `case...esac`**
 
-* `$?` holds the **exit status** of the **last command**.
-* `0` means **success**, anything else means **failure**.
+Useful for matching multiple patterns.
 
-#### 🧪 Example:
+#### Syntax:
 
 ```bash
-ls /nonexistent
-echo "Exit status: $?"   # likely 2
-
-ls /
-echo "Exit status: $?"   # 0
+case "$var" in
+    pattern1)
+        # code
+        ;;
+    pattern2)
+        # code
+        ;;
+    *)
+        # default case
+        ;;
+esac
 ```
 
-You can also set a script's exit status:
+#### Example:
 
 ```bash
-exit 1   # Script ends with exit code 1 (custom failure)
+read -p "Enter a letter: " letter
+case "$letter" in
+    [a-z])
+        echo "Lowercase letter"
+        ;;
+    [A-Z])
+        echo "Uppercase letter"
+        ;;
+    *)
+        echo "Not a letter"
+        ;;
+esac
+```
+
+---
+
+### 🔹 **4. Loops**
+
+#### 🔁 `for` loop
+
+Iterates over items or a sequence.
+
+```bash
+for i in 1 2 3; do
+    echo "Number: $i"
+done
+```
+
+With a range:
+
+```bash
+for i in {1..5}; do
+    echo "$i"
+done
+```
+
+---
+
+#### 🔁 `while` loop
+
+Repeats while a condition is true.
+
+```bash
+count=1
+while [ $count -le 5 ]; do
+    echo "Count: $count"
+    ((count++))
+done
+```
+
+---
+
+#### 🔁 `until` loop
+
+Repeats until a condition becomes true.
+
+```bash
+num=1
+until [ $num -gt 5 ]; do
+    echo "Number: $num"
+    ((num++))
+done
+```
+
+---
+
+### 🔹 **5. Loop Control: `break` and `continue`**
+
+* `break` → exit the loop immediately
+* `continue` → skip current iteration
+
+#### Example with `break`:
+
+```bash
+for i in {1..10}; do
+    if [ $i -eq 5 ]; then
+        break
+    fi
+    echo "$i"
+done
+```
+
+#### Example with `continue`:
+
+```bash
+for i in {1..5}; do
+    if [ $i -eq 3 ]; then
+        continue
+    fi
+    echo "$i"
+done
 ```
 
 ---
 
 ### ✅ Summary
 
-After this module, you should be able to:
+By the end of this module, you’ll be able to:
 
-* Define and call functions in your scripts
-* Use local and global variables correctly
-* Return status codes and values from functions
-* Understand and use `$?` for exit status checking
+* Make decisions using `if`, `else`, and `case`
+* Use test expressions safely with `[ ]` or `[[ ]]`
+* Loop over items or ranges using `for`, `while`, `until`
+* Control flow using `break` and `continue`
 
 ---
